@@ -35,38 +35,49 @@ public class HomeController {
         return "upload";
     }
 
+    /**
+     * This method receives an uploaded file from the html-page from the use and stores it.
+     * Then it creates excelfiles from that json-file.
+     * @param file uploaded filw from the HTML-page "upload"
+     * @param redirectAttributes gives message about succes / error when uploading file
+     * @return back to front page. Redirect empties the body (uploaded file)
+     */
     @PostMapping("/uploadFile")
     public String uploadFile(@RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {
 
+        //deleting existing files, if there are any
         fileDeleteService.deleteExistingFiles();
 
+        //this in the case of that the user clicks submit before selecting af file to upload
         if (file.isEmpty()) {
             redirectAttributes.addFlashAttribute("msg", "Please select a file to upload");
             return "redirect:/";
         }
 
+        /*
+          input type at HTML-page is file and it's sent to Controller with PostMapping
+          UploadedFileStoreService stores it.
+         */
         Path upLoadedPath = uploadedFileStoreService.uploadFile(file);
+
+        /*
+           If the file is not empty, RuleService creates excelfiles from it
+           The user gets a message about succes.
+         */
         if(upLoadedPath != null) {
             ruleService.createExcelFiles(upLoadedPath);
             redirectAttributes.addFlashAttribute("msg",
                     "You successfully uploaded " + file.getOriginalFilename());
         }
-
         return "redirect:/";
     }
 
-    // stien for sikkerheds skyld:
-    // String name = "C:\\C DATAMATIKER 2021\\demoregler\\src\\main\\resources\\files\\excelFiles\\ JIRA .xlsx";
-
-
     /**
-     * This method returns zip-file, that includes al files from directory "excelFiles"
-     * Those files are generated from the uploaded file.
-     * Method has a @ResponseBody, that returns Seriazible, but it also could be byte[] in this case.
+     * This method returns zip-file, that includes all files from directory "excelFiles"
+     * Those files we earlier (postmapping uploadFile) generated from the uploaded file.
+     * Method has a @ResponseBody, that returns Seriazible, but it also could be byte[].
      * But Serializable is more generic.
      * "produces" in GetMapping creates zip-fil, that contains excel-files.
-     * TODO: files are not deleted after the download, but overwrited each time the use uploads a new json-file.
-     *
      * //https://stackoverflow.com/questions/27952949/spring-rest-create-zip-file-and-send-it-to-the-client/40498539
      * @return zip-file with al excel-files
      * @throws IOException
@@ -75,17 +86,19 @@ public class HomeController {
     @GetMapping(value = "/myFiles", produces ="application/zip")
     public @ResponseBody Serializable getFile() throws IOException {
 
-        //all files from excelFiles, where to generated files are stored
+        //all files from directory "excelFiles", where generated files are stored in
         File path = new File("C:\\C DATAMATIKER 2021\\demoregler\\src\\main\\resources\\files\\excelFiles\\");
         File [] files = path.listFiles();
 
         assert files != null;
         if(files.length > 0) {
 
+            //this creates a ZipOutputStream
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(byteArrayOutputStream);
             ZipOutputStream zipOutputStream = new ZipOutputStream(bufferedOutputStream);
 
+            //we loop each excelfile and store it in ZipOutputStream
             for (File f : files) {
                 zipOutputStream.putNextEntry(new ZipEntry(f.getName()));
                 FileInputStream fileInputStream = new FileInputStream(f);
@@ -105,7 +118,8 @@ public class HomeController {
             /*
             "produces" in GetMapping generates zip and it can't been changed in runtime,
             but if there are not any files in zip (user doesn't upload any file),
-            the user comes to an empty page
+            the user comes to an empty page.
+            TODO: errorhandling when the user uploades other than JSON-file
             */
             return null;
         }

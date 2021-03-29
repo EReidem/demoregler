@@ -29,8 +29,9 @@ import java.io.*;
 public class RuleObjectMapper{
 
     /**
-     * This method returns each main JSON-object fram JSON-array in Json-file
-     * converted to POJO. JSON-keys = fields in POJO; Json-values = values of fields in POJO
+     * This method returns array of JSON-objects in the JSON-file that contains array of JSON-objects.
+     * Each JSON-object in the array is converted to POJO called RuleRoot.
+     * JSON-keys = fields in POJO; Json-values = values of fields in POJO
      * @param path
      * @return
      * @throws IOException so Exception is catched in method call

@@ -12,6 +12,9 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
 
+/**
+ * This class creates excelfiles (sorted by vendors)
+ */
 @Setter
 @Getter
 @AllArgsConstructor
@@ -19,38 +22,54 @@ import java.util.*;
 @Service
 public class RuleService {
 
+    //this represents a RuleRoot, that has converted one JSON-object to POJO
     private RuleObjectMapper ruleObjectMapper = new RuleObjectMapper();
 
+    /**
+     * This method creates all excelfiles from uploaded JSON-file
+     * @param path to the uploaded json-file, that excelfiles are created from
+     */
     public void createExcelFiles(Path path) {
 
         try{
 
         String filePath = path.toString();
+        //array of RuleRoots from uploaded JSON-file
         RuleRoot[] ruleRoots = ruleObjectMapper.getRuleRootPOJO(filePath);
 
         ExcelGenerator excelGenerator = new ExcelGenerator();
 
-        //henter alle unikke leverandørnumre fra reglenavne
+        /*
+           We store all unik vendornames (vendors are named by numbers in the rules,
+           for instance 7 in: 7. CGI -Change - Jira to Remedy - Attachments Public)
+           from all the rules in array. In that way we can store each rule in the excelfile
+           with the corresponding vendorname.
+           Methos exctractnumber finds the number in the name.
+         */
         Set<Integer> unikVendorNumbers = new HashSet<>();
         for (RuleRoot ruleRoot : ruleRoots) {
-            //trækkes ud fra navnet
             int vendorNumber = Integer.parseInt(extractNumber(ruleRoot.getName()));
             unikVendorNumbers.add(vendorNumber);
         }
 
-        //denne mappe indeholder nummer som key og en tom arraylist som value
+        /*
+         We create a map, where keys are vendornames (=vendornumbers) og values are
+         empty arraylists af RuleRoots. Arraylists are filled later.
+         */
         Map<Integer, List<RuleRoot>> allRuleRoots = new TreeMap<>();
         for (Integer i : unikVendorNumbers) {
             allRuleRoots.put(i, new ArrayList<>());
         }
 
 
-        //looper først alle regler, henter vendornummer fra navnet
-        // og tilføjer regler til mappen, hvor key er vendornummer
+        /*
+          We loop all the rules from JSON-file.
+          - we store the vendornumber
+          - keys in map are vendornumbers and we store the rule in the correct key
+            (value for each key is a arraylist of RuleRoot)
+         */
         for (RuleRoot ruleRoot : ruleRoots) {
-            //nummeret på reglen
             int vendorNumber = Integer.parseInt(extractNumber(ruleRoot.getName()));
-            //sættes til den rigtig list, som indeholder regler, hvor key er vendorNumber
             List<RuleRoot> listWithRulesPerVendor;
             if (allRuleRoots.containsKey(vendorNumber)) {
                 listWithRulesPerVendor = allRuleRoots.get(vendorNumber);
@@ -58,19 +77,23 @@ public class RuleService {
             }
         }
 
-        //alle regler er nu her i mappen.
-        // Key = nummer på integration  og regler knyttte til key
-        // er gemt i list af regler
-        //looper en list ad gangen og laver excel-fil per leverandør
-
+        /*
+          Now are all rules in the map sorted by the vendornumbers (keys).
+          We loop each list of rules (each list belongs to certain vendor)
+          and creates an excelfile per vendor.
+          Each rule:
+          - we exctract the vendorname from the name. We split the name by "to" (fx
+          7. CGI -Change - Jira to Remedy - Attachments Public), so the name is stored
+          in an array with 2 elements: before to (7. CGI -Change - Jira)
+          and after to (Remedy - Attachments Public).
+          The first part of this array is splitted by "-" and we store the last element
+          (fx 7. CGI -Change - Jira gives Jira)  and the second part is also splitted by "-".
+          We store the first element (Remedy - Attachments Public gives Remedy).
+          The vendorName is the one, that is not REMEDY, SKAT or UFST.
+          If the names does not contain "to", the name is unknown.
+         */
         for (List<RuleRoot> ruleRootList : allRuleRoots.values()) {
 
-            //List<String> ruleNamesToIndex = new ArrayList<>();
-            //for
-            //ruleNamesToIndex.add(ruleRootList.get())
-
-
-            //lave dette til en metode for sig
             String vendorName = "";
             String[] vendorNameSplit = null;
             boolean namefound = false;
@@ -80,16 +103,9 @@ public class RuleService {
                 if (ruleRootList.get(index).getName().contains("to")) {
                     vendorNameSplit = ruleRootList.get(index).getName().split("to");
                     namefound = true;
-                }else{ /* if(!ruleRootList.get(index).getName().contains("to")){
-                    System.out.println("navnet " + ruleRootList.get(index).getName());*/
-                    vendorName = "unknownVendor";
-                    //break;
-                }
-
+                }else{ vendorName = "unknownVendor";}
             index++;
-
             }
-
 
             if(vendorNameSplit != null && vendorNameSplit.length > 0) {
                 String[] firstPart = vendorNameSplit[0].split("-");
@@ -105,7 +121,11 @@ public class RuleService {
             }
 
 
-                excelGenerator.createWorkBook(ruleRootList, vendorName);
+            /*
+              We create the excelfile for one vendor
+              with the rules in the arraylist and the vendorName
+             */
+            excelGenerator.createWorkBook(ruleRootList, vendorName);
             }
         } catch (IOException e) {
                 e.printStackTrace();
@@ -113,7 +133,13 @@ public class RuleService {
     }
 
 
-    //https://stackoverflow.com/questions/18590901/check-if-a-string-contains-numbers-java/18590949
+    /**
+     * This method loops the vendorname og stores the first appearance of a number (1 og 2 chars)
+     * Vendors are named by numbers.
+     * //https://stackoverflow.com/questions/18590901/check-if-a-string-contains-numbers-java/18590949
+     * @param str is vendorname, fx 7. CGI -Change - Jira to Remedy - Attachments Public
+     * @return the number, we have exctracted from the name
+     */
 
     public String extractNumber(String str) {
 

@@ -38,21 +38,26 @@ public class ExcelGenerator {
     public void createWorkBook(List<RuleRoot> ruleRootList, String vendorName) throws IOException {
 
         XSSFWorkbook wb = new XSSFWorkbook();
+        //this stores ruleNames, so that we can store them on the index sheet
         List<String> ruleNamesToIndex = new ArrayList<>();
 
         for(int i = 0; i < ruleRootList.size(); i++){
             ruleSheetGenerator.createSheet(wb, i, ruleRootList.get(i));
             ruleNamesToIndex.add(ruleRootList.get(i).getName());
+            //rowNumber has to be reset to 0 before creating the next excel-file
             RuleSheetGenerator.rowNumber = 0;
         }
 
-        //this creates index-sheet for the workbook
-        //Rulenames link to the sheet in question
+        //this creates index-sheet for the workbook at index 0 in the sheet
+        //Each rulename links to the sheet in question
         XSSFSheet sheet = wb.createSheet("Index");
         wb.setSheetOrder(sheet.getSheetName(), 0);
         ruleSheetGenerator.createSheetIndex(wb, sheet, ruleNamesToIndex);
 
-        //var is explicit type
+        /*var is explicit type
+          the path is (whitespace before and after vendorName)
+          "C:\\C DATAMATIKER 2021\\demoregler\\src\\main\\resources\\files\\excelFiles\\ JIRA .xlsx"
+         */
         final var path = "C:\\C DATAMATIKER 2021\\demoregler\\src\\main\\resources\\files\\excelFiles\\" + vendorName + ".xlsx";
         FileOutputStream fileOut = new FileOutputStream(path);
         wb.write(fileOut);

@@ -24,17 +24,18 @@ public class RuleSheetGenerator {
     private RuleSheetGeneratorUtilities ruleSheetGeneratorUtilities;
 
     /**
-     * This method creates the sheet and cells in the sheet.
+     * This method creates the sheet and cells in this sheet.
      * @param wb          workbook (per vendor)
      * @param sheetNumber sheetnames are numbered
      * @param rule        RuleRoot is a main POJO for JSON objekt.This method creates 1 sheet for 1 rule.
      */
-    public String createSheet(XSSFWorkbook wb, int sheetNumber, RuleRoot rule) {
+    public void createSheet(XSSFWorkbook wb, int sheetNumber, RuleRoot rule) {
 
         XSSFSheet sheet = wb.createSheet(Integer.toString(sheetNumber));
 
         /*
-         The sheet includes fieldnames from several classes.
+         The sheet includes fieldnames from several classes (fx EntityCondition),
+         that represents json-subobjects in one main json-object (represented by RuleRoot-class).
          */
         List<String> ruleRootFields = rule.getFieldNames();
         List<String> attachmentFields = rule.getAttachmentMapping().getFieldNames();
@@ -43,6 +44,7 @@ public class RuleSheetGenerator {
         if(rule.getEntityConditions() != null){
             entityConditionFields = rule.getEntityConditions().get(0).getFieldNames();}
         else {
+            //entityConditionFiels must not be empty or it fails in String[][] values
             for(int i = 0; i < 4; i++){
                 entityConditionFields.add("");
             }
@@ -62,7 +64,6 @@ public class RuleSheetGenerator {
         }
 
         String e = "emptyCell";
-
 
         //[row][column]. Each {} is one row in excel-file
         String[][] values = {
@@ -87,7 +88,8 @@ public class RuleSheetGenerator {
                 {e, e, e, entityConditionFields.get(0), entityConditionFields.get(1), entityConditionFields.get(2), entityConditionFields.get(3)}
         };
 
-        ruleSheetGeneratorUtilities.generateRows(wb, sheet,0, values);
+        //rowNumber is 0 at that point so we start at row 0
+        ruleSheetGeneratorUtilities.generateRows(wb, sheet,rowNumber, values);
 
         //Values of fields in each EntityCondition are generated one row at a time
         if(rule.getEntityConditions() != null) {
@@ -107,7 +109,7 @@ public class RuleSheetGenerator {
         /*
          This generates bold-cells. We have the whole row bold (row 0, 10, 11)
          and only one column bold (row 1-4)
-         Nested loop: first loop is row, the second loop is columns on each row.
+         Nested loop: first loop is row, the second loop is columns on each of these rows.
          */
         for(int row = 0; row < 12; row++){
             if(sheet.getRow(row) != null) {
@@ -137,7 +139,6 @@ public class RuleSheetGenerator {
         //default style for cells (wrap, alignment). Has to be defined after creating cells
         ruleSheetGeneratorUtilities.styleColumnWidth(sheet);
 
-        return rule.getName();
     }
 
     /**
