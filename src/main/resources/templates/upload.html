@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>upload</title>
+</head>
+<body>
+<h1>Welcome!</h1>
+<hr/>
+<h4>Upload Single File:</h4>
+<form method="POST" th:action="@{/uploadFile}" enctype="multipart/form-data">
+    <input type="file" name="file"/> <br/><br/>
+    <button type="submit">Submit</button>
+</form>
+<hr/>
+<!-- this works even intelliJ claims "cannot resolve msg"" -->
+<h4 th:text="${msg}"></h4>
+
+
+<!-- link to zip-file that contains excel-files -->
+<a th:href="@{/myFiles}" >Download files</a>
+
+
+
+
+</body>
+</html>
