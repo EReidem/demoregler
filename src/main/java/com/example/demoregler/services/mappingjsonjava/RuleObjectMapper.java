@@ -5,7 +5,11 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.io.*;
 
@@ -19,7 +23,9 @@ import java.io.*;
 
 @Setter
 @Getter
+//@NoArgsConstructor
 @AllArgsConstructor
+@Service
 public class RuleObjectMapper{
 
     /**

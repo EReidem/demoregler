@@ -22,7 +22,6 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@Service
 public class ExcelGenerator {
 
     private RuleSheetGenerator ruleSheetGenerator = new RuleSheetGenerator(new RuleSheetGeneratorUtilities());
@@ -47,12 +46,14 @@ public class ExcelGenerator {
             RuleSheetGenerator.rowNumber = 0;
         }
 
-        //this creates index-sheet at index 0 in workbook
+        //this creates index-sheet for the workbook
+        //Rulenames link to the sheet in question
         XSSFSheet sheet = wb.createSheet("Index");
         wb.setSheetOrder(sheet.getSheetName(), 0);
-        ruleSheetGenerator.createSheetIndex(sheet, ruleNamesToIndex);
+        ruleSheetGenerator.createSheetIndex(wb, sheet, ruleNamesToIndex);
 
-        String path = "C:\\C DATAMATIKER 2021\\demoregler\\src\\main\\resources\\testFiles\\" + vendorName + ".xlsx";
+        //var is explicit type
+        final var path = "C:\\C DATAMATIKER 2021\\demoregler\\src\\main\\resources\\files\\excelFiles\\" + vendorName + ".xlsx";
         FileOutputStream fileOut = new FileOutputStream(path);
         wb.write(fileOut);
         fileOut.close();

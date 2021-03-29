@@ -4,14 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.HorizontalAlignment;
-import org.apache.poi.ss.usermodel.VerticalAlignment;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFFont;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.usermodel.*;
+
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -102,9 +98,35 @@ public class RuleSheetGeneratorUtilities {
         cell.setCellValue(repeated);
     }
 
-    public void generateIndexRows(XSSFSheet sheet, List<String> ruleNames){
-        //her ska jeg sætte navne ind i sheet
-        // og lav dem til links?
+    /**
+     * This method creates an index sheet with names for rules.
+     * Each ruleName links to the sheet in question.
+     * Creationhelper creates links.
+     * @param wb workbook
+     * @param sheet
+     * @param ruleNames
+     */
+    public void generateIndexRows(XSSFWorkbook wb, XSSFSheet sheet, List<String> ruleNames){
+
+        CreationHelper createHelper = wb.getCreationHelper();
+        for(int i = 0; i < ruleNames.size(); i++){
+            Cell cell = sheet.createRow(i).createCell(1);
+            cell.setCellValue(ruleNames.get(i));
+            Hyperlink link = createHelper.createHyperlink(Hyperlink.LINK_DOCUMENT);
+            String sheetName = wb.getSheetName(Integer.parseInt(String.valueOf(i+1)));
+            link.setAddress(sheetName+ "!R1C3");
+            cell.setHyperlink(link);
+
+            //style for the column with links (bold, underline, autowidth)
+            XSSFCellStyle cellStyle = wb.createCellStyle();
+            XSSFFont font = wb.createFont();
+            font.setBold(true);
+            cellStyle.setFont(font);
+            font.setColor(IndexedColors.ROYAL_BLUE.index);
+            font.setUnderline(Font.U_SINGLE);
+            cell.setCellStyle(cellStyle);
+            sheet.autoSizeColumn(1);
+        }
     }
 
 
@@ -153,6 +175,21 @@ public class RuleSheetGeneratorUtilities {
     }
 
     /**
+     * This method creates on every sheet a link back to index sheet.
+     * Creationhelper creates links.
+     * @param wb workbook
+     * @param sheet
+     */
+    public void createLinkToIndex(Workbook wb, XSSFSheet sheet){
+        CreationHelper createHelper = wb.getCreationHelper();
+        Cell cellll = sheet.getRow(0).getCell(0);
+        Hyperlink link = createHelper.createHyperlink(Hyperlink.LINK_DOCUMENT);
+        link.setAddress("Index!R1C1");
+        cellll.setHyperlink(link);
+        sheet.autoSizeColumn(0);
+    }
+
+    /**
      * Sheet includes both autosized and customized column width
      * column width 2560 = 10 characters is default:
      * https://grobmeier.solutions/generating-excel-sheets-with-spring-and-apache-poi.html
@@ -160,8 +197,7 @@ public class RuleSheetGeneratorUtilities {
      */
     public void styleColumnWidth(XSSFSheet sheet){
 
-        sheet.setColumnWidth(0, 1000);
-        for(int i = 1; i < 3; i++) sheet.autoSizeColumn(i, true);
+        for(int i = 0; i < 3; i++) sheet.autoSizeColumn(i, true);
 
         for(int i = 3; i < 7; i++) sheet.setColumnWidth(i, 6500);
 

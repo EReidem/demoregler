@@ -63,9 +63,10 @@ public class RuleSheetGenerator {
 
         String e = "emptyCell";
 
+
         //[row][column]. Each {} is one row in excel-file
         String[][] values = {
-                {e, ruleRootFields.get(0), rule.getName(), ruleRootFields.
+                {"Go back to Index", ruleRootFields.get(0), rule.getName(), ruleRootFields.
                         get(5), "Inbound", e, "Outbound", ruleRootFields.get(7)},
 
                 {e, ruleRootFields.get(4), Integer.toString(rule.getPriority()),
@@ -129,14 +130,25 @@ public class RuleSheetGenerator {
             }
         }
 
+
+         //This creates a link back to index sheet.
+        ruleSheetGeneratorUtilities.createLinkToIndex(wb, sheet);
+
         //default style for cells (wrap, alignment). Has to be defined after creating cells
         ruleSheetGeneratorUtilities.styleColumnWidth(sheet);
 
         return rule.getName();
     }
 
-    public void createSheetIndex(XSSFSheet sheet, List<String> sheetNames){
-        ruleSheetGeneratorUtilities.generateIndexRows(sheet, sheetNames);
+    /**
+     * This method creates an index sheet with names for rules.
+     * Each ruleName links to the sheet in question.
+     * @param wb workbook
+     * @param sheet
+     * @param sheetNames er numbers from 0 etc.
+     */
+    public void createSheetIndex(XSSFWorkbook wb, XSSFSheet sheet, List<String> sheetNames){
+        ruleSheetGeneratorUtilities.generateIndexRows(wb, sheet, sheetNames);
     }
 
 }
