@@ -2,26 +2,31 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <!-- Bootstrap -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <!-- customized CSS -->
+    <link rel="stylesheet" href="mySheet.css">
     <title>upload</title>
 </head>
 <body>
+<!-- container for content -->
+<div class="container container-custom">
+
 <h1>Welcome!</h1>
-<hr/>
-<h4>Upload Single File:</h4>
+
+<h5>Upload Single File:</h5>
 <form method="POST" th:action="@{/uploadFile}" enctype="multipart/form-data">
     <input type="file" name="file"/> <br/><br/>
-    <button type="submit">Submit</button>
+    <button type="submit">Upload</button>
 </form>
-<hr/>
+
 <!-- this works even intelliJ claims "cannot resolve msg"" -->
 <h4 th:text="${msg}"></h4>
 
-
 <!-- link to zip-file that contains excel-files -->
-<a th:href="@{/myFiles}" >Download files</a>
+<a th:href="@{/myFiles}" >Click here to download your excel files</a>
 
-
-
-
+</div>
 </body>
 </html>
