@@ -74,7 +74,7 @@ public class HomeController {
 
     /**
      * This method returns zip-file, that includes all files from directory "excelFiles"
-     * Those files we earlier (postmapping uploadFile) generated from the uploaded file.
+     * Those files we just earlier (in postmapping "uploadFile") generated from the uploaded file.
      * Method has a @ResponseBody, that returns Seriazible, but it also could be byte[].
      * But Serializable is more generic.
      * "produces" in GetMapping creates zip-fil, that contains excel-files.

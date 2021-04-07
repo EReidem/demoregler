@@ -141,7 +141,7 @@ public class RuleService {
      * @return the number, we have exctracted from the name
      */
 
-    public String extractNumber(String str) {
+    private String extractNumber(String str) {
 
         if (str == null || str.isEmpty()) return "0";
 
